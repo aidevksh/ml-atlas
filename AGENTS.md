@@ -4,8 +4,10 @@
 
 - This repository visualizes core machine learning and deep learning theories and equations with interactive learning pages.
 - Use `ml-atlas` for the learning page brand, browser title, and repository name. The README display title may use `ML Atlas`.
-- Create each topic at `<topic>/index.html`; keep its HTML, CSS, and JavaScript in that single file.
-- Use light mode only. Prefer self-contained pages that also work when opened directly with `file://`.
+- Implement the website in TypeScript and React. Keep learning content in `src/data/curriculum.ts` and interactive lessons in React components under `src/components/`.
+- Category display order is LLM, DL, ML, 강화학습, 수학, 파이토치, 모델설계학습. Within each category, order lessons from foundations to applications and link relevant prerequisites.
+- Use light mode only and responsive layouts for mobile. The production build should also work when opened directly with `file://`.
+- Preserve `transformer/index.html` as a compatibility redirect; the actual Transformer lesson must use React components, not an iframe or injected legacy HTML.
 - Show equations, dimensions, numerical examples, and their visual relationships in each theory section.
 - Connect drag, sliders, and selections to actual calculations. Explain illustrative assumptions and distinguish them from trained-model behavior.
 - Do not add the labels `CHAPTER 01`, `학습용 결정적 예제`, or `외부 라이브러리 없이 동작` to the page chrome. Keep useful explanations of numerical examples within the relevant learning content.
@@ -17,7 +19,7 @@
 - For changes to an existing topic's theory coverage or interactions, update its README description and section table.
 - Only list implemented topics and interactions. Use working relative file links and correct heading anchors.
 - Preserve the concise Korean introduction, readable tables, and consistent formatting.
-- Check that all topic directories are represented in the README before completing a change.
+- Check that all registered categories and topic notes are represented in the README before completing a change. Distinguish concept notes, related experiments, and fully interactive lessons accurately.
 
 ## Validation and license
 
