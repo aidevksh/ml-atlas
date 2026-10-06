@@ -15,3 +15,6 @@ html = html.replace(style[0], () => `<style>${css}</style>`);
 await writeFile('dist/index.html', html);
 await mkdir('dist/transformer', { recursive: true });
 await copyFile('transformer/index.html', 'dist/transformer/index.html');
+for (const file of ['LICENSE', 'LICENSE-CONTENT', 'LICENSING.md', 'NOTICE']) {
+  await copyFile(file, `dist/${file}`);
+}

@@ -174,7 +174,10 @@ ml-atlas/
 ├── tsconfig.json
 ├── vite.config.ts
 ├── AGENTS.md
-├── LICENSE                        # Apache License 2.0
+├── LICENSE                        # 코드: Apache License 2.0
+├── LICENSE-CONTENT                # 학습 콘텐츠: CC BY 4.0
+├── LICENSING.md                   # 적용 범위·저작자 표시 안내
+├── NOTICE                         # 저작권·출처 고지
 └── README.md
 \`\`\`
 
@@ -195,7 +198,12 @@ ${refs.map(ref=>`- [${ref.title}](${ref.url})`).join('\n')}
 
 ## 라이선스
 
-[Apache License 2.0](./LICENSE).
+Copyright © 2026 aidevksh and contributors.
+
+- **코드·학습용 코드 예제**: [Apache License 2.0](./LICENSE).
+- **학습 글·그림·도식 및 README의 설명**: [CC BY 4.0](./LICENSE-CONTENT). 상업적 이용·판매·수정·재배포를 허용하며, 공유할 때 저작자·원본·라이선스 및 변경 여부 등을 표시합니다.
+
+코드와 설명이 같은 소스 파일에 들어 있는 경우의 구분, 저작자 표시 예시 및 외부 자료의 취급은 [라이선스 적용 범위](./LICENSING.md)를 참고하세요. 빌드 결과에도 라이선스와 [출처 고지](./NOTICE)를 포함합니다.
 `;
 await writeFile('README.md',readme);
 console.log(`README updated: ${curriculum.length} lessons, ${Object.keys(models).length} experiments.`);

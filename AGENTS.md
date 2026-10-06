@@ -26,3 +26,4 @@
 - Verify JavaScript syntax and interactions appropriate to the change. Check numerical invariants when changing mathematics.
 - Use primary references for theory and include relevant reference links in the page and README.
 - Preserve the Apache License 2.0 in `LICENSE`.
+- Original learning text and visual content use CC BY 4.0 in `LICENSE-CONTENT`; software and code examples retain Apache 2.0. Keep `LICENSING.md`, `NOTICE`, the site footer, and generated README consistent with this scope.
