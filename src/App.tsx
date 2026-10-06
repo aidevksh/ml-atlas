@@ -15,6 +15,7 @@ import { LearningConnections, ConceptMap } from './components/ConceptConnections
 import { NetworkMark, NetworkGlyph, CategoryIcon, CategoryGlyph, ConceptMapIcon } from './components/Brand';
 import AboutSite from './components/AboutSite';
 import { currentPath, href, navigate, subscribe } from './lib/route';
+import { normalizePath, pageSeo, updateSeo } from './lib/seo';
 
 const extendedLabs = new Set(['softmax','vectors','gradients','derivatives','probability','linear-regression','kmeans','gan','rag','shape-design','qlearning']);
 const learningTags = new Set(['지도', '비지도', '자기지도', '준지도', '강화']);
@@ -23,8 +24,10 @@ function readList(key: string) {
   try { const value: unknown = JSON.parse(localStorage.getItem(key) ?? '[]'); return Array.isArray(value) ? value.filter((id): id is string => typeof id === 'string' && Boolean(getTopic(id))) : []; } catch { return []; }
 }
 function useStoredList(key: string) {
-  const [value, setValue] = useState<string[]>(() => readList(key));
-  useEffect(() => { try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* Storage is optional, including in file:// mode. */ } }, [key, value]);
+  // The first client render matches the public HTML; load private records after hydration.
+  const [value, setValue] = useState<string[]>([]), [loaded, setLoaded] = useState(false);
+  useEffect(() => { setValue(readList(key)); setLoaded(true); }, [key]);
+  useEffect(() => { if (!loaded) return; try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* Storage is optional, including in file:// mode. */ } }, [key, value, loaded]);
   const toggle = (id: string) => setValue(current => current.includes(id) ? current.filter(old => old !== id) : [...current, id]);
   return [value, toggle] as const;
 }
@@ -60,14 +63,14 @@ function CategoryPage({ id, completed, saved, toggleSave }: { id: CategoryId; co
   const [tag, setTag] = useState('전체');
   const visible = topics.filter(t => tag === '전체' || t.tags.includes(tag));
   const tags = [...new Set(topics.flatMap(t => t.tags))].filter(tag => id === 'cs' || learningTags.has(tag));
-  return <div style={categoryStyle(id)}><div className="breadcrumb"><a href={href('/')}>학습 지도</a><span>/</span>{c.name}</div><section className="category-intro"><div><div className="eyebrow">{c.english}</div><h1><CategoryName category={c} /><span className="title-dot">.</span></h1><p>{c.description}</p><div className="inline-meta">{topics.length}개 학습 노트 <span>·</span> {done}개 완료 <span>·</span> 기초 → 응용</div></div><MiniArt type={id} /></section><div className="category-progress"><div style={{ width: `${done / topics.length * 100}%` }} /></div>
+  return <div style={categoryStyle(id)}><nav className="breadcrumb" aria-label="현재 위치"><a href={href('/')}>학습 지도</a><span aria-hidden>/</span><span aria-current="page">{c.name}</span></nav><section className="category-intro"><div><div className="eyebrow">{c.english}</div><h1><CategoryName category={c} /><span className="title-dot">.</span></h1><p>{c.description}</p><div className="inline-meta">{topics.length}개 학습 노트 <span>·</span> {done}개 완료 <span>·</span> 기초 → 응용</div></div><MiniArt type={id} /></section><div className="category-progress"><div style={{ width: `${done / topics.length * 100}%` }} /></div>
     <div className="filter-bar"><div className="filter-chips" role="group" aria-label="학습 방식 필터">{['전체', ...tags].map(value => <button key={value} className={tag === value ? 'active' : ''} aria-pressed={tag === value} onClick={() => setTag(value)}>{value === '전체' ? value : tagLabel(value)}</button>)}</div><span className="all-topics-experiment">모든 주제에 설명과 실험이 있어요</span></div>
     {visible.length ? [...new Set(visible.map(t => t.group))].map((group, i) => <section className="topic-group" key={group}><div className="group-heading"><span>{String(i + 1).padStart(2, '0')}</span><h2>{group}</h2><small>{visible.filter(t => t.group === group).length}개 노트</small></div><div className="topic-list">{visible.filter(t => t.group === group).map(t => <TopicRow key={t.id} topic={t} index={topics.indexOf(t)} done={completed.includes(t.id)} saved={saved.includes(t.id)} onSave={() => toggleSave(t.id)} />)}</div></section>) : <div className="empty-state">이 조건에 맞는 노트가 없습니다. 필터를 바꿔보세요.</div>}
   </div>;
 }
 function LessonPage({ topic, completed, saved, toggleComplete, toggleSave }: { topic: Topic; completed: string[]; saved: string[]; toggleComplete: (id: string) => void; toggleSave: (id: string) => void }) {
   const category = categories.find(c => c.id === topic.category)!, ordered = categoryTopics(topic.category), index = ordered.indexOf(topic);
-  return <div className="lesson-page" style={categoryStyle(topic.category)}><div className="breadcrumb"><a href={href('/')}>학습 지도</a><span>/</span><a href={href(`/category/${category.id}`)}>{category.name}</a><span>/</span>{topic.group}</div><div className="lesson-intro"><div><div className="eyebrow">{category.english} · {String(index + 1).padStart(2, '0')} / {ordered.length}</div><h1>{topic.title}</h1><p>{topic.summary}</p><div className="topic-meta"><Kind />{topic.tags.map(tag => <span key={tag}>{tagLabel(tag)}</span>)}</div></div><button className={`button bookmark ${saved.includes(topic.id) ? 'active' : ''}`} aria-pressed={saved.includes(topic.id)} onClick={() => toggleSave(topic.id)}>{saved.includes(topic.id) ? '◆ 저장됨' : '◇ 북마크'}</button></div>
+  return <div className="lesson-page" style={categoryStyle(topic.category)}><nav className="breadcrumb" aria-label="현재 위치"><a href={href('/')}>학습 지도</a><span aria-hidden>/</span><a href={href(`/category/${category.id}`)}>{category.name}</a><span aria-hidden>/</span><span aria-current="page">{topic.title}</span></nav><div className="lesson-intro"><div><div className="eyebrow">{category.english} · {String(index + 1).padStart(2, '0')} / {ordered.length}</div><h1>{topic.title}</h1><p>{topic.summary}</p><div className="topic-meta"><Kind />{topic.tags.map(tag => <span key={tag}>{tagLabel(tag)}</span>)}</div></div><button className={`button bookmark ${saved.includes(topic.id) ? 'active' : ''}`} aria-pressed={saved.includes(topic.id)} onClick={() => toggleSave(topic.id)}>{saved.includes(topic.id) ? '◆ 저장됨' : '◇ 북마크'}</button></div>
     {topic.prerequisites.length > 0 && <div className="prerequisites"><span>먼저 알면 좋아요</span>{topic.prerequisites.map(id => <a key={id} href={href(`/lesson/${id}`)}>{getTopic(id)?.title} ↗</a>)}</div>}
     <ReadingBefore topic={topic} content={readings[topic.id]} />
     {topic.id === 'transformer' ? <Transformer /> : <TopicExperiment topicId={topic.id} model={lessonModels[topic.id]} />}
@@ -84,15 +87,17 @@ function LessonPage({ topic, completed, saved, toggleComplete, toggleSave }: { t
     <nav className="lesson-pagination" aria-label="추천 학습 순서">{index > 0 ? <a href={href(`/lesson/${ordered[index - 1].id}`)}><small>← 이전 노트</small><b>{ordered[index - 1].title}</b></a> : <a href={href(`/category/${category.id}`)}><small>← 목차</small><b>{category.name} 학습 순서</b></a>}{index + 1 < ordered.length ? <a href={href(`/lesson/${ordered[index + 1].id}`)}><small>다음 노트 →</small><b>{ordered[index + 1].title}</b></a> : <a href={href(`/category/${category.id}`)}><small>목차로 →</small><b>카테고리 다시 보기</b></a>}</nav>
   </div>;
 }
-export default function App() {
-  const [path, setPath] = useState(currentPath), [query, setQuery] = useState(''), [menu, setMenu] = useState(false);
+export default function App({ initialPath }: { initialPath?: string } = {}) {
+  const [path, setPath] = useState(() => normalizePath(initialPath ?? currentPath())), [query, setQuery] = useState(''), [menu, setMenu] = useState(false);
   const [completed, toggleComplete] = useStoredList('ml-atlas:completed'), [saved, toggleSave] = useStoredList('ml-atlas:saved');
-  const [resume, setResume] = useState(() => { try { return getTopic(localStorage.getItem('ml-atlas:resume') ?? '')?.id ?? ''; } catch { return ''; } });
+  const [resume, setResume] = useState('');
+  useEffect(() => { try { setResume(getTopic(localStorage.getItem('ml-atlas:resume') ?? '')?.id ?? ''); } catch { /* Optional persistence. */ } }, []);
   const menuButton = useRef<HTMLButtonElement>(null), sidebar = useRef<HTMLElement>(null), main = useRef<HTMLElement>(null);
   const segments = path.replace(/^\//, '').split('/'), type = segments[0], id = segments[1] ?? '';
-  const topic = type === 'lesson' ? getTopic(id) : undefined, activeCategory = topic?.category ?? (type === 'category' ? id : '');
-  useEffect(() => subscribe(() => { setPath(currentPath()); setQuery(''); setMenu(false); }), []);
-  useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); main.current?.focus({ preventScroll: true }); document.title = topic ? `${topic.title} — ml-atlas` : activeCategory ? `${categories.find(c => c.id === activeCategory)?.name ?? '학습 지도'} — ml-atlas` : 'ml-atlas'; if (topic?.id === 'transformer') { const oldSection = path.split('/')[3]; if (['structure','attention','heads','blocks','cache'].includes(oldSection)) requestAnimationFrame(() => document.getElementById(`transformer-${oldSection}`)?.scrollIntoView()); } if (topic) { setResume(topic.id); try { localStorage.setItem('ml-atlas:resume', topic.id); } catch { /* Optional persistence. */ } } }, [path, topic, activeCategory]);
+  const validPage = pageSeo(path).found;
+  const topic = validPage && type === 'lesson' ? getTopic(id) : undefined, activeCategory = topic?.category ?? (validPage && type === 'category' ? id : '');
+  useEffect(() => subscribe(() => { setPath(normalizePath(currentPath())); setQuery(''); setMenu(false); }), []);
+  useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); main.current?.focus({ preventScroll: true }); updateSeo(path); if (topic?.id === 'transformer') { const oldSection = path.split('/')[3]; if (['structure','attention','heads','blocks','cache'].includes(oldSection)) requestAnimationFrame(() => document.getElementById(`transformer-${oldSection}`)?.scrollIntoView()); } if (topic) { setResume(topic.id); try { localStorage.setItem('ml-atlas:resume', topic.id); } catch { /* Optional persistence. */ } } }, [path, topic]);
   useEffect(() => {
     if (!menu) return;
     const previous = document.activeElement as HTMLElement | null;
@@ -115,10 +120,10 @@ export default function App() {
       <main id="main-content" ref={main} tabIndex={-1} className="main-content">
         {query.trim() ? <><div className="eyebrow">FIND A CONCEPT</div><h1 className="search-title">“{query}” 검색 결과</h1><p className="results-count" role="status">{searchResults.length}개 노트</p><div className="topic-list">{searchResults.map((t, i) => <TopicRow key={t.id} topic={t} index={i} done={completed.includes(t.id)} saved={saved.includes(t.id)} onSave={() => toggleSave(t.id)} />)}</div>{!searchResults.length && <div className="empty-state">검색 결과가 없습니다. 다른 이름이나 관련 개념을 입력해보세요.</div>}</>
           : !type ? <Home completed={completed} resume={resume} />
-          : type === 'category' && categories.some(c => c.id === id) ? <CategoryPage key={id} id={id as CategoryId} completed={completed} saved={saved} toggleSave={toggleSave} />
-          : type === 'graph' ? <ConceptMap/>
+          : validPage && type === 'category' ? <CategoryPage key={id} id={id as CategoryId} completed={completed} saved={saved} toggleSave={toggleSave} />
+          : validPage && type === 'graph' ? <ConceptMap/>
           : topic ? <LessonPage key={topic.id} topic={topic} completed={completed} saved={saved} toggleComplete={toggleComplete} toggleSave={toggleSave} />
-          : type === 'saved' || type === 'completed' ? <><div className="eyebrow">MY LEARNING</div><h1 className="search-title">{type === 'saved' ? '북마크' : '학습 완료'}</h1><p className="results-count">{personalTopics.length}개 노트 · 이 브라우저의 학습 기록</p>{personalTopics.length ? <div className="topic-list">{personalTopics.map((t, i) => <TopicRow key={t.id} topic={t} index={i} done={completed.includes(t.id)} saved={saved.includes(t.id)} onSave={() => toggleSave(t.id)} />)}</div> : <div className="empty-state"><b>아직 기록이 없습니다.</b><p>노트를 북마크하거나 학습 완료를 표시해보세요.</p><a className="button" href={href('/')}>학습 지도 둘러보기 →</a></div>}</>
+          : validPage && (type === 'saved' || type === 'completed') ? <><div className="eyebrow">MY LEARNING</div><h1 className="search-title">{type === 'saved' ? '북마크' : '학습 완료'}</h1><p className="results-count">{personalTopics.length}개 노트 · 이 브라우저의 학습 기록</p>{personalTopics.length ? <div className="topic-list">{personalTopics.map((t, i) => <TopicRow key={t.id} topic={t} index={i} done={completed.includes(t.id)} saved={saved.includes(t.id)} onSave={() => toggleSave(t.id)} />)}</div> : <div className="empty-state"><b>아직 기록이 없습니다.</b><p>노트를 북마크하거나 학습 완료를 표시해보세요.</p><a className="button" href={href('/')}>학습 지도 둘러보기 →</a></div>}</>
           : <div className="empty-state"><h1>노트를 찾을 수 없습니다.</h1><a className="button" href={href('/')}>학습 지도로 돌아가기 →</a></div>}
       </main><footer className="site-footer"><a className="footer-brand" href={href('/')}><NetworkMark/> ml-atlas</a><span>© 2026 <a href="https://github.com/aidevksh/ml-atlas" target="_blank" rel="noreferrer">aidevksh &amp; contributors</a></span><AboutSite/><div className="footer-licenses"><a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noreferrer">코드 Apache 2.0 ↗</a><a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">학습 콘텐츠 CC BY 4.0 ↗</a></div></footer></div>
   </div>;

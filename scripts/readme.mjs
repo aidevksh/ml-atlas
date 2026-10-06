@@ -37,7 +37,7 @@ const readme = `<div align="center">
 
 LLM부터 수학까지, 개념을 작은 계산과 직접 움직이는 실험으로 연결합니다.<br>정의부터 차근차근 읽고, 수식을 풀어보고, 숫자가 바뀌는 과정을 확인하세요.
 
-[학습 목차](#학습-목차) · [시작하기](#시작하기) · [Transformer](#transformer) · [참고 자료](#참고-자료)
+[학습 목차](#학습-목차) · [시작하기](#시작하기) · [SEO·배포](#seo배포) · [Transformer](#transformer) · [참고 자료](#참고-자료)
 
 </div>
 
@@ -59,7 +59,7 @@ ${curriculum.length-1}개 주제에는 각각의 수치·규칙 계산 모델과
 
 미분 설명은 개발자의 [소프트맥스 몫 규칙](https://velog.io/@aidevksh/소프트맥스-미분-몫-규칙), [소프트맥스와 크로스 엔트로피](https://velog.io/@aidevksh/소프트맥스와-크로스-엔트로피-미분), [MSE·Cross-Entropy](https://velog.io/@aidevksh/MSE-Cross-Entropy), Sigmoid·tanh·ReLU 글을 참고해 재구성했습니다. Sigmoid 글의 중간 전개는 d(e⁻ˣ)/dx=−e⁻ˣ의 부호를 바로잡았고, p−y가 확률 자체가 아닌 logit의 미분임을 명시했습니다. 공식 문서와 수치 미분으로 검산했으며 각 페이지의 참고 링크에서 원문을 볼 수 있습니다.
 
-브랜드·카테고리 아이콘은 폰트에 의존하지 않는 SVG입니다. LLM은 텍스트 말풍선, DL은 단순한 층별 노드, ML은 산점도와 회귀선, RL은 보상과 순환 화살표로 표현합니다. 홈 지도에는 중첩 SVG 없이 도형을 직접 배치합니다. 보라색 브랜드 로고와 SVG·32px PNG 파비콘·180px Apple touch 아이콘은 같은 5개 노드·4개 연결을 사용하며 [공통 도형 데이터](./src/data/brand.ts)에서 생성합니다. 푸터의 **사이트 정보** 대화상자에는 [개발자 메일](mailto:aidevksh@gmail.com), [GitHub](https://github.com/aidevksh), [블로그](https://ksh.ai.kr), 라이선스를 표시합니다.
+브랜드·카테고리 아이콘은 폰트에 의존하지 않는 SVG입니다. LLM은 텍스트 말풍선, DL은 단순한 층별 노드, ML은 산점도와 회귀선, RL은 보상과 순환 화살표로 표현합니다. 홈 지도에는 중첩 SVG 없이 도형을 직접 배치합니다. 보라색 브랜드 로고와 SVG·32px/96px PNG 파비콘·180px Apple touch 아이콘은 같은 5개 노드·4개 연결을 사용하며 [공통 도형 데이터](./src/data/brand.ts)에서 생성합니다. 푸터의 **사이트 정보** 대화상자에는 [개발자 메일](mailto:aidevksh@gmail.com), [GitHub](https://github.com/aidevksh), [블로그](https://ksh.ai.kr), 라이선스를 표시합니다.
 
 콘텐츠는 버전 관리하는 TypeScript 데이터입니다. 현재의 정적 학습 사이트에는 서버 DB가 필요하지 않습니다. 개인 기록은 이 브라우저의 localStorage에 저장합니다. 로그인·서버 DB·기기 간 동기화는 없으며 저장소가 차단되어도 학습 기능은 동작합니다.
 
@@ -79,7 +79,22 @@ npm run build
 npm run preview
 \`\`\`
 
-빌드한 \`dist/index.html\`은 JS·CSS를 포함하는 단일 파일입니다. 파일 직접 열기를 지원하도록 구성했으며 브라우저의 로컬 파일·저장소 정책에 따라 동작이 다를 수 있습니다. 소스 \`index.html\`은 Vite 개발 서버에서 엽니다. 정적 호스팅에는 \`dist/\`를 배포합니다. hash 라우팅으로 별도 서버 rewrite 없이 주제 링크가 동작합니다. 기존 \`transformer/index.html\`과 \`#attention\` 등의 링크는 React의 연속 본문으로 이동합니다.
+빌드한 루트 \`dist/index.html\`은 JS·CSS를 포함하는 단일 파일입니다. 파일 직접 열기를 지원하도록 구성했으며 브라우저의 로컬 파일·저장소 정책에 따라 동작이 다를 수 있습니다. 소스 \`index.html\`은 Vite 개발 서버에서 엽니다. HTTP에서는 \`/lesson/transformer\`와 같은 경로를, file://에서는 hash 라우팅을 사용합니다. 정적 호스팅에는 **dist 전체**를 배포하고 아래 Nginx 규칙으로 생성된 페이지를 제공해야 합니다. 기존 \`transformer/index.html\`과 \`#attention\` 등의 링크는 React의 연속 본문으로 이동합니다.
+
+## SEO·배포
+
+대표 주소는 **https://ml-atlas.ksh.ai.kr/**입니다. 빌드 시 같은 React 컴포넌트로 홈·${categories.length}개 카테고리·${curriculum.length}개 학습 노트·개념 지도의 **${curriculum.length+categories.length+2}개 공개 페이지**를 사전 렌더링합니다. JavaScript 실행 전에도 정의·수식·차원·예제·내부 링크를 읽을 수 있으며 hydration 이후 실험이 동작합니다. 깊은 페이지는 공통 해시 JS·CSS 자산을 사용하고 루트는 file:// 호환성을 유지합니다.
+
+모든 공개 페이지에 고유 제목·설명·self canonical·Open Graph·Twitter 메타와 콘텐츠에 맞는 JSON-LD를 넣습니다. 홈 WebSite, 카테고리 ItemList, 노트 LearningResource·BreadcrumbList를 생성합니다. \`dist/sitemap.xml\`과 \`dist/robots.txt\`는 등록된 공개 경로에서 생성합니다. 개인 북마크·완료 페이지와 오류 페이지는 noindex이며 사이트맵에 넣지 않습니다. 실제 변경 시점을 알 수 없는 sitemap lastmod는 생략합니다.
+
+[Nginx 설정](./deploy/nginx-seo.conf)으로 사전 렌더링 HTML 우선 제공·중복 주소 301·없는 주소 HTTP 404를 적용합니다. 기존 SPA fallback 규칙과 중복해서 넣지 않습니다. [SEO 운영 가이드](./docs/SEO.md)에 검색 의도별 우선 페이지, 배포 확인, 서치 콘솔 소유권 확인과 사이트맵 제출 절차를 정리했습니다. Google이 발급한 HTML 확인 토큰은 선택적으로 \`GOOGLE_SITE_VERIFICATION\` 환경변수에 설정하고 빌드할 수 있습니다.
+
+\`\`\`bash
+npm run seo:check
+npm run seo:check -- https://ml-atlas.ksh.ai.kr
+\`\`\`
+
+첫 명령은 빌드 결과, 두 번째는 실제 서버의 원본 HTML·MIME·404를 검사합니다. 서버 반영·Google 계정 등록은 별도 작업이며 사이트맵과 SEO 개선이 색인이나 검색 순위를 보장하지는 않습니다. [Google JavaScript SEO](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics) · [사이트맵 안내](https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview)
 
 ## 학습 목차
 
@@ -165,6 +180,7 @@ ml-atlas/
 ├── src/
 │   ├── App.tsx                     # 홈·목차·개인 기록·주제 라우팅
 │   ├── main.tsx
+│   ├── entry-server.tsx            # 동일 React 트리 사전 렌더링
 │   ├── styles.css                  # 라이트모드·모바일·긴 본문
 │   ├── data/
 │   │   ├── brand.ts                # 로고·파비콘의 공통 도형
@@ -199,6 +215,8 @@ ml-atlas/
 │   │   ├── AboutSite.tsx          # 개발자·링크·라이선스 팝업
 │   │   └── UI.tsx
 │   └── lib/
+│       ├── seo.ts                 # 공개 경로·제목·canonical·JSON-LD
+│       ├── seo.test.tsx            # SSR·메타·제외 경로 검증
 │       ├── lessonModelTypes.ts
 │       ├── lessonModels.ts        # ${curriculum.length-1}개 수치·규칙 계산 모델
 │       ├── mathModels.ts
@@ -221,10 +239,15 @@ ml-atlas/
 │       ├── experiments.ts
 │       ├── lessons.test.ts        # 전체 설명·주제 수치 검증
 │       └── math.test.ts           # Transformer·기존 계산 검증
-├── public/                       # 신경망 SVG·PNG·Apple touch 아이콘
+├── public/                       # 신경망 SVG·PNG·Apple touch·공유 이미지
+├── deploy/nginx-seo.conf          # 정적 HTML·MIME·301·404 라우팅
+├── docs/SEO.md                    # SEO 전략·서치 콘솔·배포 절차
 ├── transformer/index.html         # 기존 주소 호환 이동
 ├── scripts/
 │   ├── compat.mjs                 # 단일 파일 빌드
+│   ├── seo.mjs                    # 페이지 HTML·사이트맵·robots 생성
+│   ├── check-seo.mjs              # 빌드/실제 서버 전체 SEO 감사
+│   ├── preview.mjs                # 사전 렌더링 HTML·301·404 미리보기
 │   ├── icons.mjs                  # 같은 신경망 도형의 아이콘 재생성
 │   └── readme.mjs                 # 구현 목록에서 README 생성
 ├── index.html                     # 개발용 진입점

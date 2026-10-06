@@ -1,10 +1,11 @@
 // Served over HTTP the app uses real paths (/lesson/transformer). Opened via file:// there is no
 // server to fall back to index.html, so routes live in the hash (#/lesson/transformer) instead.
-const hashMode = window.location.protocol === 'file:';
+const hashMode = typeof window !== 'undefined' && window.location.protocol === 'file:';
 
 export const href = (path: string) => hashMode ? `#${path}` : path;
 
 export function currentPath() {
+  if (typeof window === 'undefined') return '/';
   return hashMode ? window.location.hash.replace(/^#/, '') || '/' : window.location.pathname;
 }
 
@@ -21,6 +22,6 @@ export function subscribe(update: () => void) {
 }
 
 // Old shared links (https://…/#/lesson/x) keep working by moving the hash route into the path.
-if (!hashMode && window.location.hash.startsWith('#/')) {
+if (typeof window !== 'undefined' && !hashMode && window.location.hash.startsWith('#/')) {
   window.history.replaceState(null, '', window.location.hash.slice(1));
 }

@@ -12,9 +12,9 @@ const js = await readFile(localAsset(script[1]), 'utf8');
 const css = await readFile(localAsset(style[1]), 'utf8');
 html = html.replace(script[0], () => `<script type="module">${js.replace(/<\/script/gi, '<\\/script')}</script>`);
 html = html.replace(style[0], () => `<style>${css}</style>`);
-// Inline the primary icon too: HTTP deep links and file:// both keep the mark.
+// Keep a crawlable favicon URL for Search and an embedded fallback for file://.
 const favicon=await readFile('public/favicon.svg','utf8');
-html=html.replace(/(<link[^>]+rel="icon"[^>]+href=")[^"]+("[^>]*>)/,(_,before,after)=>`${before}data:image/svg+xml,${encodeURIComponent(favicon)}${after}`);
+html=html.replace(/<link[^>]+rel="icon"[^>]*>/,tag=>tag.replace(/\s*\/>$/,` data-file-icon="data:image/svg+xml,${encodeURIComponent(favicon)}" />`));
 await writeFile('dist/index.html', html);
 await mkdir('dist/transformer', { recursive: true });
 await copyFile('transformer/index.html', 'dist/transformer/index.html');

@@ -22,7 +22,7 @@ function Curve({ title, xLabel, yLabel, calculate, current, bounds, tangent }: {
   const px=(x:number)=>54+(x+4)*54,py=(y:number)=>204-(y-bottom)/(top-bottom)*174;
   const y=calculate(current),path=points.map((p,i)=>`${i?'L':'M'}${px(p.x)} ${py(p.y)}`).join(' ');
   return <figure className="classification-curve"><figcaption>{title}</figcaption><svg viewBox="0 0 520 250" role="img" aria-label={`${xLabel}에 따른 ${yLabel}`}>
-    <title>{title} · 보라 곡선, 주황 현재 값{tangent===undefined?'':', 초록 접선'}</title>
+    <title>{`${title} · 보라 곡선, 주황 현재 값${tangent===undefined?'':', 초록 접선'}`}</title>
     {[lo,(lo+hi)/2,hi].map((tick,i)=><g key={i}><path d={`M54 ${py(tick)}H486`} stroke="#e5deeb" /><text x="47" y={py(tick)+4} textAnchor="end">{n(tick)}</text></g>)}
     <path d="M54 26V204H486" fill="none" stroke="#b5a8c7" />
     <path d={path} fill="none" stroke="#7561b8" strokeWidth="3" />
