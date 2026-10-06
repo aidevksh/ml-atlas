@@ -1,0 +1,22 @@
+import { useState } from 'react';
+import { curriculum,getTopic,learningTrails,type Topic } from '../data/curriculum';
+import { allConceptLinks as conceptLinks,conceptSegments } from '../lib/conceptGraph';
+import { href } from '../lib/route';
+
+export function ConceptText({text,current}:{text:string;current?:string}) {
+ return <>{conceptSegments(text,current).map((part,i)=>part.id?<a className="concept-inline-link" key={i} href={href(`/lesson/${part.id}`)} title={`${getTopic(part.id)!.title} 노트로 이동`}>{part.text}</a>:part.text)}</>;
+}
+function Neighborhood({topic}:{topic:Topic}) {
+ const group=(links:typeof conceptLinks,side:'from'|'to')=>[...new Set(links.map(l=>l[side]))].map(id=>{const matches=links.filter(l=>l[side]===id);return{...matches[0],kind:[...new Set(matches.map(l=>l.kind))].join(' · '),explanation:matches.find(l=>l.kind==='학습 흐름')?.explanation??matches[0].explanation};});
+ const outgoing=group(conceptLinks.filter(l=>l.from===topic.id),'to'),incoming=group(conceptLinks.filter(l=>l.to===topic.id),'from'),ids=[...new Set([...outgoing.map(l=>l.to),...incoming.map(l=>l.from)])],nodes=ids.slice(0,8).map((id,i)=>({topic:getTopic(id)!,x:310+200*Math.cos(i/Math.min(ids.length,8)*Math.PI*2-Math.PI/2),y:165+108*Math.sin(i/Math.min(ids.length,8)*Math.PI*2-Math.PI/2)}));
+ return <><svg className="concept-neighborhood" viewBox="0 0 620 340" role="img" aria-label={`${topic.title}의 연결 지도`}><title>중앙 현재 노트, 주변 연결된 노트; 각 노드를 누르면 이동</title>{nodes.map(node=><g key={node.topic.id}><line x1="310" y1="165" x2={node.x} y2={node.y} stroke="#ccbddf" strokeWidth="1.5"/><a href={href(`/lesson/${node.topic.id}`)} aria-label={`${node.topic.title} 노트 열기`}><circle cx={node.x} cy={node.y} r="17" fill="#eee6f7" stroke="#9779b5"/><text x={node.x} y={node.y+32} textAnchor="middle">{node.topic.title.length>15?`${node.topic.title.slice(0,14)}…`:node.topic.title}</text></a></g>)}<circle cx="310" cy="165" r="27" fill="#7561b8"/><text x="310" y="211" textAnchor="middle" className="current-concept">{topic.title}</text></svg><p className="connection-caption">노드를 눌러 이동하세요. 최대 8개를 그리며, 모든 연결과 방향은 아래 목록에서 확인할 수 있습니다.</p><div className="connection-columns"><div><h3>이 노트가 연결하는 개념</h3>{outgoing.length?outgoing.map((link,i)=><a key={`${link.to}-${i}`} href={href(`/lesson/${link.to}`)}><span>{link.kind}</span><b>{getTopic(link.to)!.title} ↗</b><small>{link.explanation}</small></a>):<p>선수 지식 없이 시작하는 기초 노트입니다.</p>}</div><div><h3>이 노트를 연결하는 개념 · 역링크</h3>{incoming.length?incoming.map((link,i)=><a key={`${link.from}-${i}`} href={href(`/lesson/${link.from}`)}><span>{link.kind}</span><b>{getTopic(link.from)!.title} ↗</b><small>{link.explanation}</small></a>):<p>다른 노트의 연결이 아직 없습니다.</p>}</div></div></>;
+}
+export function LearningConnections({topic}:{topic:Topic}) {
+ const trails=learningTrails.filter(t=>t.steps.some(s=>s.id===topic.id));
+ return <section className="learning-connections"><span className="reading-label">이 개념이 이어지는 곳</span><h2>계산을 하나의 흐름으로 연결하기</h2>{trails.map(trail=><div className="learning-trail" key={trail.title}><h3>{trail.title}</h3><p>{trail.description}</p><ol>{trail.steps.map(s=><li key={s.id} className={s.id===topic.id?'current':''}><a href={href(`/lesson/${s.id}`)} aria-current={s.id===topic.id?'page':undefined}>{getTopic(s.id)!.title}</a><p>{s.why}</p></li>)}</ol></div>)}<details className="connection-details"><summary>개념 연결 지도와 모든 역링크 보기</summary><Neighborhood topic={topic}/></details></section>;
+}
+export function ConceptMap() {
+ const [id,setId]=useState('neural-network'),[query,setQuery]=useState(''),topic=getTopic(id)!;
+ const filtered=curriculum.filter(t=>`${t.title} ${t.summary}`.toLowerCase().includes(query.toLowerCase())),options=filtered.some(t=>t.id===id)?filtered:[topic,...filtered];
+ return <section className="concept-map-page"><div className="eyebrow">CONNECTED NOTES</div><h1>개념 연결 지도</h1><p>노트의 선수 지식과 학습 흐름을 양방향으로 탐색합니다. 표시 순서와 학습 의존성은 다르며, 현재 노트의 연결 이유와 역링크를 확인하세요.</p><div className="map-controls"><label>개념 검색<input aria-label="연결 지도 개념 검색" value={query} onChange={e=>setQuery(e.target.value)} placeholder="신경망, 검색, 알고리즘…"/></label><label>중심 노트<select aria-label="연결 지도 중심 노트" value={id} onChange={e=>setId(e.target.value)}>{options.map(t=><option value={t.id} key={t.id}>{t.title}</option>)}</select></label></div><a className="button primary" href={href(`/lesson/${id}`)}>현재 노트 읽기 ↗</a><Neighborhood topic={topic}/><LearningConnections topic={topic}/></section>;
+}

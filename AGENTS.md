@@ -5,7 +5,7 @@
 - This repository visualizes core machine learning and deep learning theories and equations with interactive learning pages.
 - Use `ml-atlas` for the learning page brand, browser title, and repository name. The README display title may use `ML Atlas`.
 - Implement the website in TypeScript and React. Keep learning content in `src/data/curriculum.ts` and interactive lessons in React components under `src/components/`.
-- Category display order is LLM, DL, ML, 강화학습, 수학, 파이토치, 모델설계학습. Within each category, order lessons from foundations to applications and link relevant prerequisites.
+- Category display order is LLM, DL, ML, RL, 수학, 파이토치, 모델설계학습, CS. Within each category, order lessons from foundations to applications and link relevant prerequisites.
 - Use light mode only and responsive layouts for mobile. The production build should also work when opened directly with `file://`.
 - Preserve `transformer/index.html` as a compatibility redirect; the actual Transformer lesson must use React components, not an iframe or injected legacy HTML.
 - Show equations, dimensions, numerical examples, and their visual relationships in each theory section.

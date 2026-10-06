@@ -82,7 +82,7 @@ describe('learning experiments', () => {
 });
 describe('curriculum integrity', () => {
   test('category order is user-defined and every category contains content', () => {
-    expect(categories.map(c => c.id)).toEqual(['llm', 'dl', 'ml', 'rl', 'math', 'pytorch', 'design']);
+    expect(categories.map(c => c.id)).toEqual(['llm', 'dl', 'ml', 'rl', 'math', 'pytorch', 'design', 'cs']);
     for (const c of categories) expect(curriculum.some(t => t.category === c.id)).toBe(true);
   });
   test('notes have unique routes, theory and working prerequisite identifiers', () => {

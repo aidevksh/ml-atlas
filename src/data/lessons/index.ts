@@ -5,5 +5,6 @@ import { rlReadings } from './rl';
 import { llmReadings } from './llm';
 import { pytorchReadings } from './pytorch';
 import { designReadings } from './design';
+import { csReadings } from './cs';
 import type { Reading } from './types';
-export const readings: Record<string, Reading> = { ...mathReadings, ...dlReadings, ...mlReadings, ...rlReadings, ...llmReadings, ...pytorchReadings, ...designReadings };
+export const readings: Record<string, Reading> = { ...mathReadings, ...dlReadings, ...mlReadings, ...rlReadings, ...llmReadings, ...pytorchReadings, ...designReadings, ...csReadings };

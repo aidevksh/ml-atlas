@@ -1,7 +1,9 @@
 import type { Calculation } from '../lib/lessonModelTypes';
 import { n, normal } from '../lib/lessonModelTypes';
+import CSScene from './CSScene';
 
 export default function TopicScene({topicId,p,result}:{topicId:string;p:Record<string,number>;result:Calculation}) {
+  if(topicId.startsWith('cs-')) return <CSScene topicId={topicId} p={p} result={result}/>;
   if(topicId==='graphrag'){
     const names=['A회사','B회사','C회사','제품X','연구Y'],edges=[[0,1],[1,2],[0,3],[2,4]],positions=[[80,80],[230,80],[380,80],[80,220],[380,220]],start=p.start?2:0,dist=[Infinity,Infinity,Infinity,Infinity,Infinity];dist[start]=0;const queue=[start];while(queue.length){const at=queue.shift()!;for(const [a,b] of edges){const next=a===at?b:b===at?a:-1;if(next>=0&&dist[next]===Infinity){dist[next]=dist[at]+1;queue.push(next);}}}
     return <figure className="topic-scene"><svg viewBox="0 0 460 290" role="img" aria-label="탐색 hop 안에 들어오는 지식 그래프 개체">{edges.map(([a,b],i)=><line key={i} x1={positions[a][0]} y1={positions[a][1]} x2={positions[b][0]} y2={positions[b][1]} stroke={dist[a]<=p.depth&&dist[b]<=p.depth?'#a088bf':'#dfd6e7'} strokeWidth="3"/>)}{names.map((name,i)=><g key={name}><circle cx={positions[i][0]} cy={positions[i][1]} r="30" fill={i===start?'#dbc9ed':dist[i]<=p.depth?'#dfeee6':'#f2edf6'} stroke={dist[i]<=p.depth?'#a088bf':'#ded4e7'}/><text x={positions[i][0]} y={positions[i][1]+5} textAnchor="middle">{name}</text><text x={positions[i][0]} y={positions[i][1]+50} textAnchor="middle">{dist[i]} hop</text></g>)}</svg><figcaption>보라: 출발 개체 · 초록: hop 한도 안의 개체. 선은 고정 자료에 기록된 관계입니다. 실제 GraphRAG는 개체·관계 추출과 커뮤니티 요약의 원문 근거도 관리해야 합니다.</figcaption></figure>;

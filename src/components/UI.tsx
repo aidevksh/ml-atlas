@@ -6,9 +6,9 @@ export function Card({ title, action, children, className = '' }: { title?: stri
 }
 export function Formula({ children }: { children: ReactNode }) { return <div className="formula">{children}</div>; }
 export function Note({ children }: { children: ReactNode }) { return <p className="note">{children}</p>; }
-export function Slider({ label, value, onChange, min, max, step = 1, suffix = '' }: { label: string; value: number; onChange: (value: number) => void; min: number; max: number; step?: number; suffix?: string }) {
+export function Slider({ label, value, onChange, min, max, step = 1, suffix = '' }: { label: string; value: number; onChange: (value: number) => void; min: number; max: number; step?: number | 'any'; suffix?: string }) {
   const id = useId();
-  return <div className="slider-control"><label htmlFor={id}>{label}</label><input id={id} type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(Number(e.target.value))} /><output htmlFor={id}>{step < 1 ? fmt(value, step < .1 ? 2 : 1) : value}{suffix}</output></div>;
+  return <div className="slider-control"><label htmlFor={id}>{label}</label><input id={id} type="range" min={min} max={max} step={step} value={value} onChange={e => onChange(Number(e.target.value))} /><output htmlFor={id}>{step === 'any' ? fmt(value,4) : step < 1 ? fmt(value, step < .1 ? 2 : 1) : value}{suffix}</output></div>;
 }
 export function Choice<T extends string | number>({ label, options, value, onChange }: { label: string; options: { value: T; label: string }[]; value: T; onChange: (value: T) => void }) {
   return <div className="choice" role="group" aria-label={label}>{options.map(option => <button key={option.value} aria-pressed={value === option.value} className={value === option.value ? 'selected' : ''} onClick={() => onChange(option.value)}>{option.label}</button>)}</div>;

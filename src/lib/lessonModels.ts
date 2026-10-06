@@ -5,5 +5,6 @@ import { rlModels } from './rlModels';
 import { llmModels } from './llmModels';
 import { pytorchModels } from './pytorchModels';
 import { designModels } from './designModels';
+import { csModels } from './csModels';
 import type { LessonModel } from './lessonModelTypes';
-export const lessonModels:Record<string,LessonModel>={...mathModels,...dlModels,...mlModels,...rlModels,...llmModels,...pytorchModels,...designModels};
+export const lessonModels:Record<string,LessonModel>={...mathModels,...dlModels,...mlModels,...rlModels,...llmModels,...pytorchModels,...designModels,...csModels};
