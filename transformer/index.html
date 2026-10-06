@@ -7,11 +7,12 @@
   <title>Transformer — ml-atlas</title>
 </head>
 <body>
-  <p><a href="../index.html#/lesson/transformer">React Transformer 학습 페이지 열기 →</a></p>
+  <p><a href="/lesson/transformer">React Transformer 학습 페이지 열기 →</a></p>
   <script>
     const part = location.hash.slice(1);
     const valid = ['structure', 'attention', 'heads', 'blocks', 'cache'].includes(part);
-    location.replace('../index.html#/lesson/transformer' + (valid ? '/' + part : ''));
+    const route = '/lesson/transformer' + (valid ? '/' + part : '');
+    location.replace(location.protocol === 'file:' ? '../index.html#' + route : route);
   </script>
 </body>
 </html>
