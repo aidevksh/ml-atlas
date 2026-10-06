@@ -3,7 +3,7 @@
 ## Product and format
 
 - This repository visualizes core machine learning and deep learning theories and equations with interactive learning pages.
-- Brand all learning pages as `ML Atlas`. The repository name is `ml-atlas`.
+- Use `ml-atlas` for the learning page brand, browser title, and repository name. The README display title may use `ML Atlas`.
 - Create each topic at `<topic>/index.html`; keep its HTML, CSS, and JavaScript in that single file.
 - Use light mode only. Prefer self-contained pages that also work when opened directly with `file://`.
 - Show equations, dimensions, numerical examples, and their visual relationships in each theory section.
